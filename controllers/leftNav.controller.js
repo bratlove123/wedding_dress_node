@@ -34,7 +34,7 @@ module.exports = {
         });
     },
     getAll:function(req, res,next){
-        LeftNav.find({}, function(err, leftNavs){
+        LeftNav.find({}).populate('childs').exec(function(err, leftNavs){
             if(err){
                 next(err);
             }
@@ -43,10 +43,11 @@ module.exports = {
     },
     getSort: function(req, res,next){
         var sortBy = {};
-        sortBy[req.query.orderBy?"":"modifiedOn"] = req.query.sort?1:-1;
+        sortBy[req.query.orderBy?req.query.orderBy:"modifiedOn"] = req.query.sort?1:-1;
         var skip = parseInt(req.query.pageSize)*(parseInt(req.query.pageNumber)-1);
         var pageSize =  parseInt(req.query.pageSize);
-        LeftNav.find({}, {},
+        var search = req.query.search;
+        LeftNav.find({$or:[ {'name':{ "$regex": search, "$options": "i" }}, {'url':{ "$regex": search, "$options": "i" }} ]}, {},
         {
             skip:skip,
             limit:pageSize,
@@ -132,6 +133,23 @@ module.exports = {
                     });
                 }
             }  
+        });
+    },
+    delete: function(req, res, next){
+        LeftNav.findById(req.params.id, function(err, leftNav){
+            leftNav.remove(function(err){
+                if(!err){
+                    LeftNavItem.deleteMany({leftNavId: leftNav._id}, function(err){
+                        if(err){
+                            next(err);
+                        }
+                        res.json({status:'success',message:'Delete left nav success!', data: leftNav._id});
+                    });
+                }
+                else{
+                    next(err);
+                }
+            });
         });
     }
 }

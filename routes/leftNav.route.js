@@ -7,4 +7,5 @@ router.get('/getsort', leftNavController.getSort);
 router.get('/getall', leftNavController.getAll);
 router.get('/get/:id', leftNavController.getLeftNavById);
 router.put('/update/:id', leftNavController.edit);
+router.delete('/delete/:id', leftNavController.delete);
 module.exports=router;
