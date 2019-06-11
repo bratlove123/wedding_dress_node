@@ -34,7 +34,9 @@ module.exports = {
         });
     },
     getAll:function(req, res,next){
-        LeftNav.find({}).populate('childs').exec(function(err, leftNavs){
+        var sortBy = {};
+        sortBy["position"] = 1;
+        LeftNav.find({}, {}, {sort: sortBy}).populate({path: 'childs', options: {sort: {position: -1}}}).exec(function(err, leftNavs){
             if(err){
                 next(err);
             }
@@ -92,43 +94,54 @@ module.exports = {
                 let childsUpdate = childs.filter((c)=>{
                     return c._id;
                 });
-                childsAdd.forEach(element => {
-                    element.leftNavId = ln._id;
-                });
-                LeftNavItem.insertMany(childsAdd, function(err, lni){
-                    if(err){
-                        next(err);
-                    }
-                    if(lni && lni.length>0){
-                        let childsToAdd = [];
-                        lni.forEach(e=>{
-                            childsToAdd.push(e._id);
-                        });
-                        childsUpdate.forEach(e=>{
-                            childsToAdd.push(e._id);
-                        });
-                        ln.childs = childsToAdd;
-                        ln.save().then((err, ln)=>{
-                            if(err){
-                                next(err);
-                            }
-                            res.json({status:'success',message:'Updated left nav success!', data: ln});
-                        });
-                    }
-                });
-                
-                childsUpdate.forEach(e=>{
-                    //Update left nav
-                    LeftNavItem.findByIdAndUpdate(e._id, {$set: e}, function(err, lni){
+                var isRequestAdd = false;
+                if(childsAdd.length > 0){
+                    isRequestAdd = true;
+                    childsAdd.forEach(element => {
+                        element.leftNavId = ln._id;
+                    });
+                    LeftNavItem.insertMany(childsAdd, function(err, lni){
                         if(err){
                             next(err);
                         }
+                        if(lni && lni.length>0){
+                            let childsToAdd = [];
+                            lni.forEach(e=>{
+                                childsToAdd.push(e._id);
+                            });
+                            childsUpdate.forEach(e=>{
+                                childsToAdd.push(e._id);
+                            });
+                            ln.childs = childsToAdd;
+                            ln.save().then((ln)=>{
+                                res.json({status:'success',message:'Updated left nav success!', data: ln});
+                            });
+                        }
                     });
-                });
+                }
+                var isRequestUpdate = false;
+                if(childsUpdate.length > 0){
+                    isRequestUpdate=true;
+                    childsUpdate.forEach(e=>{
+                        //Update left nav
+                        LeftNavItem.findByIdAndUpdate(e._id, {$set: e}, function(err, lni){
+                            if(err){
+                                next(err);
+                            }
+                            if(!isRequestAdd){
+                                res.json({status:'success',message:'Updated left nav success!', data: lni});
+                            }
+                        });
+                    });
+                }
+                
                 if(del_arr && del_arr.length>0){
                     LeftNavItem.deleteMany( {_id: { $in: del_arr}}, function(err, lni){
                         if(err){
                             next(err);
+                        }
+                        if(!isRequestUpdate){
+                            res.json({status:'success',message:'Updated left nav success!', data: lni});
                         }
                     });
                 }
