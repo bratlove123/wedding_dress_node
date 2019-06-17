@@ -36,7 +36,7 @@ module.exports = {
     getAll:function(req, res,next){
         var sortBy = {};
         sortBy["position"] = 1;
-        LeftNav.find({}, {}, {sort: sortBy}).populate({path: 'childs', options: {sort: {position: -1}}}).exec(function(err, leftNavs){
+        LeftNav.find({}, {}, {sort: sortBy}).populate({path: 'childs', options: {sort: {position: 1}}}).exec(function(err, leftNavs){
             if(err){
                 next(err);
             }
@@ -54,7 +54,7 @@ module.exports = {
             skip:skip,
             limit:pageSize,
             sort: sortBy
-        }).populate('childs').exec(
+        }).populate('childs').populate('modifiedBy').exec(
         function(err, allDatas){
             if(err){
                 next(err);
@@ -122,15 +122,19 @@ module.exports = {
                 var isRequestUpdate = false;
                 if(childsUpdate.length > 0){
                     isRequestUpdate=true;
-                    childsUpdate.forEach(e=>{
+                    childsUpdate.forEach((e, i)=>{
                         //Update left nav
                         LeftNavItem.findByIdAndUpdate(e._id, {$set: e}, function(err, lni){
                             if(err){
                                 next(err);
                             }
-                            if(!isRequestAdd){
-                                res.json({status:'success',message:'Updated left nav success!', data: lni});
+
+                            if(i===childsUpdate.length-1){
+                                if(!isRequestAdd){
+                                    res.json({status:'success',message:'Updated left nav success!', data: lni});
+                                }
                             }
+                            
                         });
                     });
                 }

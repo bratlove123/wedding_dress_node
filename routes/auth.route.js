@@ -47,6 +47,7 @@ router.post('/login', async (req, res, next) => {
           fullName: user.firstName + ' ' + user.lastName,
           email: user.email,
           avatar: user.image,
+          id: user._id,
           role: "Admin"
         } });
       });     
