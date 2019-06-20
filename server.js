@@ -4,6 +4,9 @@ const product = require('./routes/product.route');
 const user = require('./routes/user.route');
 const auth = require('./routes/auth.route');
 const leftNav = require('./routes/leftNav.route');
+const role = require('./routes/role.route');
+const file = require('./routes/file.route');
+const public = require('./routes/public.route');
 const passport = require('passport');
 const cors = require('cors')
 const app = express();
@@ -30,6 +33,9 @@ app.use('/user', user);
 app.use('/products', passport.authenticate('jwt', { session : false }), product);
 app.use('/leftnav', passport.authenticate('jwt', { session : false }), leftNav);
 app.use('/auth', auth);
+app.use('/role', passport.authenticate('jwt', { session : false }), role);
+app.use('/upload', passport.authenticate('jwt', { session : false }), file);
+app.use('/public', public);
 
 //Handle 404
 app.use(function(req, res, next){
@@ -47,6 +53,9 @@ app.use(function(err, req, res, next){
             break;
         case 404:
             res.status(404).json({message: 'Not Found'});
+            break;
+        case 403:
+            res.status(403).json({message: err.message || '', code: err.code || ''});
             break;
         default:
             res.status(500).json({message: 'Something went wrong'});

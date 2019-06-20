@@ -1,25 +1,32 @@
-const userModel = require('../models/user.model');
+const User = require('../models/user.model');
 
 module.exports = {
     create: function(req, res, next){
-        // userModel.create({name: req.body.name, email: req.body.email, password: req.body.password}, function(err, result){
-        //     if(err){
-        //         next(err);
-        //     }
-        //     else{
-        //         res.json({
-        //             status: 'success', message: 'User added successfully!', data: null
-        //         })
-        //     }
-        // });
+        User.findOne({$or: [{'userName': req.body.userName}, {'email': req.body.email}]}, function(err, user){
+            if(err){
+              return next(err);
+            }
+            if(user){
+              return next({status:403,message:'User already exists!', data: null});
+            }
+
+            var user = new User(req.body);
+            user.save(function(err, user){
+                if(err){
+                    return next(err);
+                }
+
+                res.json({status:'success',message:'Create user success!', data: user});
+            });
+        }); 
     },
     getSort: function(req, res, next){
         var sortBy = {};
-        sortBy[req.query.orderBy?req.query.orderBy:"modifiedOn"] = req.query.sort?1:-1;
+        sortBy[req.query.orderBy?req.query.orderBy:"modifiedOn"] = req.query.sort==="true"?1:-1;
         var skip = parseInt(req.query.pageSize)*(parseInt(req.query.pageNumber)-1);
         var pageSize =  parseInt(req.query.pageSize);
         var search = req.query.search;
-        LeftNav.find({$or:[ {'userName':{ "$regex": search, "$options": "i" }}, 
+        User.find({$or:[ {'userName':{ "$regex": search, "$options": "i" }}, 
         {'email':{ "$regex": search, "$options": "i" }},
         {'password':{ "$regex": search, "$options": "i" }},
         {'firstName':{ "$regex": search, "$options": "i" }},
@@ -33,16 +40,72 @@ module.exports = {
         }).populate('modifiedBy').exec(
         function(err, allDatas){
             if(err){
-                next(err);
+                return next(err);
             }
-            LeftNav.count({}, function( err, count){
+            User.count({}, function( err, count){
                 if(err){
-                    next(err);
+                    return next(err);
                 }
                 res.json({status:'success',message:'Get list user success!', data: {
                     data: allDatas,
                     countAll: count
                 }});
+            });
+        });
+    },
+    getUserById:function(req, res,next){
+        User.findById(req.params.id).populate('modifiedBy').exec(function(err, ln){
+            if(err){
+                return next(err);
+            }
+            res.json({status:'success',message:'Get user success!', data: ln});
+        });
+    },
+    updateUser:function(req, res, next){
+        if(req.body.password){
+            // User.findById(req.params.id, function(err, user){
+            //     if(err){
+            //         return next(err);
+            //     }
+            //     user.save(function(err, req.body){
+            //         if(err){
+            //             return next(err);
+            //         }
+            //         res.json({status:'success',message:'Update user success!', data: user});
+            //     });
+            // });
+
+            User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, user) {
+                if (err) return next(err);
+                user.save(function(err, user){
+                    if(err){
+                        return next(err);
+                    }
+                    res.json({status:'success',message:'Update user success!', data: user});
+                });
+            });
+        }
+        else{
+            delete req.body.password;
+            User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, ln) {
+                if (err) return next(err);
+    
+                res.json({status:'success',message:'Update user success!', data: ln});
+            });
+        }
+    },
+    delete: function(req, res, next){
+        User.findById(req.params.id, function(err, user){
+            if(err){
+                return next(err);
+            }
+            user.remove(function(err){
+                if(!err){
+                    res.json({status:'success',message:'Delete user success!', data: user});
+                }
+                else{
+                    return next(err);
+                }
             });
         });
     }

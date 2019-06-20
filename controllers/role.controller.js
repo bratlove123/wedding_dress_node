@@ -1,22 +1,22 @@
-const LeftNav = require('../models/leftNav.model');
-const LeftNavItem = require('../models/leftNavItem.model');
+const Role = require('../models/role.model');
+const RoleGroup = require('../models/roleGroup.model');
 
 module.exports = {
     create: function (req, res, next) {
-        var leftNavWithoutChilds = Object.assign({}, req.body);
-        delete leftNavWithoutChilds.childs;
+        var roleGroupWithoutChilds = Object.assign({}, req.body);
+        delete roleGroupWithoutChilds.childs;
         var childs = req.body.childs;
-        var leftNav = new LeftNav(leftNavWithoutChilds);
+        var roleGroup = new RoleGroup(roleGroupWithoutChilds);
 
-        leftNav.save(function(err, ln){
+        roleGroup.save(function(err, ln){
             if(err){
                 return next(err);
             }
             if(childs && childs.length >0 ){
                 childs.forEach(element => {
-                    element.leftNavId = ln._id;
+                    element.roleGroupId = ln._id;
                 });
-                LeftNavItem.insertMany(childs, function(err, lni){
+                Role.insertMany(childs, function(err, lni){
                     if(err){
                         return next(err);
                     }
@@ -25,7 +25,7 @@ module.exports = {
                             ln.childs.push(e._id);
                         });
                         ln.save().then(()=>{
-                            res.json({status:'success',message:'Create left nav success!', data: null});
+                            res.json({status:'success',message:'Create role success!', data: null});
                         });
                     }
                 });
@@ -34,13 +34,11 @@ module.exports = {
         });
     },
     getAll:function(req, res,next){
-        var sortBy = {};
-        sortBy["position"] = 1;
-        LeftNav.find({}, {}, {sort: sortBy}).populate({path: 'childs', options: {sort: {position: 1}}}).exec(function(err, leftNavs){
+        RoleGroup.get({}).populate('childs').exec(function(err, roleGroup){
             if(err){
                 return next(err);
             }
-            res.json({status:'success',message:'Get left nav success!', data: leftNavs});
+            res.json({status:'success',message:'Get role success!', data: roleGroup});
         });
     },
     getSort: function(req, res,next){
@@ -49,43 +47,43 @@ module.exports = {
         var skip = parseInt(req.query.pageSize)*(parseInt(req.query.pageNumber)-1);
         var pageSize =  parseInt(req.query.pageSize);
         var search = req.query.search;
-        LeftNav.find({$or:[ {'name':{ "$regex": search, "$options": "i" }}, {'url':{ "$regex": search, "$options": "i" }} ]}, {},
+        RoleGroup.find({$or:[ {'name':{ "$regex": search, "$options": "i" }}, {'code':{ "$regex": search, "$options": "i" }} ]}, {},
         {
             skip:skip,
             limit:pageSize,
             sort: sortBy
         }).populate('childs').populate('modifiedBy').exec(
-        function(err, allDatas){
+        function(err, roleGroup){
             if(err){
                 return next(err);
             }
-            LeftNav.count({}, function( err, count){
+            RoleGroup.count({}, function( err, count){
                 if(err){
                     return next(err);
                 }
-                res.json({status:'success',message:'Get left nav success!', data: {
-                    data: allDatas,
+                res.json({status:'success',message:'Get role success!', data: {
+                    data: roleGroup,
                     countAll: count
                 }});
             });
         });
     },
-    getLeftNavById:function(req, res,next){
-        LeftNav.findById(req.params.id).populate('childs').exec(function(err, ln){
+    getRoleById:function(req, res,next){
+        RoleGroup.findById(req.params.id).populate('childs').exec(function(err, ln){
             if(err){
                 return next(err);
             }
-            res.json({status:'success',message:'Get left nav success!', data: ln});
+            res.json({status:'success',message:'Get role success!', data: ln});
         });
     },
     edit: function (req, res, next) {
-        var leftNavWithoutChilds = Object.assign({}, req.body);
-        delete leftNavWithoutChilds.childs;
-        delete leftNavWithoutChilds.del_arr;
+        var roleGroupWithoutChilds = Object.assign({}, req.body);
+        delete roleGroupWithoutChilds.childs;
+        delete roleGroupWithoutChilds.del_arr;
         var childs = req.body.childs;
         var del_arr =  req.body.del_arr;
 
-        LeftNav.findByIdAndUpdate(req.params.id, {$set: leftNavWithoutChilds}, function (err, ln) {
+        RoleGroup.findByIdAndUpdate(req.params.id, {$set: roleGroupWithoutChilds}, function (err, ln) {
             if (err) return next(err);
             if(childs && childs.length>0){
                 let childsAdd = childs.filter((c)=>{
@@ -100,7 +98,7 @@ module.exports = {
                     childsAdd.forEach(element => {
                         element.leftNavId = ln._id;
                     });
-                    LeftNavItem.insertMany(childsAdd, function(err, lni){
+                    Role.insertMany(childsAdd, function(err, lni){
                         if(err){
                             return next(err);
                         }
@@ -114,7 +112,7 @@ module.exports = {
                             });
                             ln.childs = childsToAdd;
                             ln.save().then((ln)=>{
-                                res.json({status:'success',message:'Updated left nav success!', data: ln});
+                                res.json({status:'success',message:'Updated role success!', data: ln});
                             });
                         }
                     });
@@ -123,15 +121,14 @@ module.exports = {
                 if(childsUpdate.length > 0){
                     isRequestUpdate=true;
                     childsUpdate.forEach((e, i)=>{
-                        //Update left nav
-                        LeftNavItem.findByIdAndUpdate(e._id, {$set: e}, function(err, lni){
+                        Role.findByIdAndUpdate(e._id, {$set: e}, function(err, lni){
                             if(err){
                                 return next(err);
                             }
 
                             if(i===childsUpdate.length-1){
                                 if(!isRequestAdd){
-                                    res.json({status:'success',message:'Updated left nav success!', data: lni});
+                                    res.json({status:'success',message:'Updated role success!', data: lni});
                                 }
                             }
                             
@@ -140,12 +137,12 @@ module.exports = {
                 }
                 
                 if(del_arr && del_arr.length>0){
-                    LeftNavItem.deleteMany( {_id: { $in: del_arr}}, function(err, lni){
+                    Role.deleteMany( {_id: { $in: del_arr}}, function(err, lni){
                         if(err){
                             return next(err);
                         }
                         if(!isRequestUpdate){
-                            res.json({status:'success',message:'Updated left nav success!', data: lni});
+                            res.json({status:'success',message:'Updated role success!', data: lni});
                         }
                     });
                 }
@@ -153,14 +150,14 @@ module.exports = {
         });
     },
     delete: function(req, res, next){
-        LeftNav.findById(req.params.id, function(err, leftNav){
-            leftNav.remove(function(err){
+        RoleGroup.findById(req.params.id, function(err, roleGroup){
+            roleGroup.remove(function(err){
                 if(!err){
-                    LeftNavItem.deleteMany({leftNavId: leftNav._id}, function(err){
+                    Role.deleteMany({roleGroupId: roleGroup._id}, function(err){
                         if(err){
                             return next(err);
                         }
-                        res.json({status:'success',message:'Delete left nav success!', data: leftNav._id});
+                        res.json({status:'success',message:'Delete role success!', data: roleGroup._id});
                     });
                 }
                 else{

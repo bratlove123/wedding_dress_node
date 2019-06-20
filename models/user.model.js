@@ -58,6 +58,12 @@ const UserSchema = new Schema({
         type: Boolean,
         default: true
     },
+    roles: [
+        { 
+            type: Schema.Types.ObjectId, 
+            ref: 'Role' 
+        }
+    ],
     createdOn: {
         type: Date,
         default: Date.now

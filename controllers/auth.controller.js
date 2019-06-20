@@ -103,28 +103,28 @@ module.exports = {
   activeAccount: function(req, res, next){
       UserModel.findOne({email: req.body.email}, function(err, user){
         if(err){
-          next(err);
+          return next(err);
         }
         if(!user){
-          next({status:401,message:'Cannot find user with this email!', data: null});
+          return next({status:401,message:'Cannot find user with this email!', data: null});
         }
         else{
           if(user.emailConfirmToken === req.body.code){
             if(user.expiryTokenTime >= new Date()){
               UserModel.update(user, {$set: {'isConfirmEmail': true}}, function(err, data){
                 if(err){
-                  next(err);
+                  return next(err);
                 }
 
                 res.json({status:200,message:'Active user successfully!', data: null});
               })
             }
             else{
-              next({status:401,message:'Token expired!', data: null});
+              return next({status:401,message:'Token expired!', data: null});
             }
           }
           else{
-            next({status:401,message:'Invalid Token!', data: null});
+            return next({status:401,message:'Invalid Token!', data: null});
           }
         }
       });
@@ -133,16 +133,16 @@ module.exports = {
   sendEmailForgot: function(req, res, next){
     UserModel.findOne({email: req.body.email}, function(err, user){
       if(err){
-        next(err);
+        return next(err);
       }
       if(!user){
-        next({status:401,message:'Cannot find user with this email!', data: null});
+        return next({status:401,message:'Cannot find user with this email!', data: null});
       }
       else{
         let newDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3);
         UserModel.update(user, {'$set': {'expiryTokenTime': newDate}}, function(err, data){
           if(err){
-            next(err);
+            return next(err);
           }
 
           authService.sendEmailForgotPass(req.body.email, user.emailConfirmToken);
@@ -155,16 +155,16 @@ module.exports = {
   sendEmailActive: function(req, res, next){
     UserModel.findOne({email: req.body.email}, function(err, user){
       if(err){
-        next(err);
+        return next(err);
       }
       if(!user){
-        next({status:401,message:'Cannot find user with this email!', data: null});
+        return next({status:401,message:'Cannot find user with this email!', data: null});
       }
       else{
         let newDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3);
         UserModel.update(user, {'$set': {'expiryTokenTime': newDate}}, function(err, data){
           if(err){
-            next(err);
+            return next(err);
           }
 
           authService.sendEmailForActivate(req.body.email, user.emailConfirmToken);
@@ -177,10 +177,10 @@ module.exports = {
   resetPassword: function(req, res, next){
     UserModel.findOne({email: req.body.email}, function(err, user){
       if(err){
-        next(err);
+        return next(err);
       }
       if(!user){
-        next({status:401, message:'Cannot find user with this email!', data: null});
+        return next({status:401, message:'Cannot find user with this email!', data: null});
       }
       else{
         if(user.emailConfirmToken === req.body.code){
@@ -190,11 +190,11 @@ module.exports = {
             res.json({status:'success',message:'Reset password successfully!', data: null});
           }
           else{
-            next({status:401, message:'Token expired!', data: null});
+            return next({status:401, message:'Token expired!', data: null});
           }
         }
         else{
-          next({status:401,message:'Invalid Token!', data: null});
+          return next({status:401,message:'Invalid Token!', data: null});
         }
       }
     });
