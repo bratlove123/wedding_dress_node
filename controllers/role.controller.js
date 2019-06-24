@@ -34,11 +34,11 @@ module.exports = {
         });
     },
     getAll:function(req, res,next){
-        RoleGroup.get({}).populate('childs').exec(function(err, roleGroup){
+        RoleGroup.find({}).populate('childs').exec(function(err, roleGroup){
             if(err){
                 return next(err);
             }
-            res.json({status:'success',message:'Get role success!', data: roleGroup});
+            res.json({status:'success',message:'Get roles success!', data: roleGroup});
         });
     },
     getSort: function(req, res,next){

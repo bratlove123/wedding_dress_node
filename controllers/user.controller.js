@@ -63,18 +63,6 @@ module.exports = {
     },
     updateUser:function(req, res, next){
         if(req.body.password){
-            // User.findById(req.params.id, function(err, user){
-            //     if(err){
-            //         return next(err);
-            //     }
-            //     user.save(function(err, req.body){
-            //         if(err){
-            //             return next(err);
-            //         }
-            //         res.json({status:'success',message:'Update user success!', data: user});
-            //     });
-            // });
-
             User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, user) {
                 if (err) return next(err);
                 user.save(function(err, user){
@@ -107,6 +95,21 @@ module.exports = {
                     return next(err);
                 }
             });
+        });
+    },
+    toggleActive:  function(req, res, next){
+        User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, ln) {
+            if (err) return next(err);
+
+            res.json({status:'success',message:'Update user success!', data: ln});
+        });
+    },
+    getRoles: function(req, res, next){
+        User.findById(req.params.id).populate('roles').exec(function(err, ln){
+            if(err){
+                return next(err);
+            }
+            res.json({status:'success',message:'Get roles of user success!', data: ln.roles});
         });
     }
 }
