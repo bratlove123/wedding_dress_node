@@ -65,6 +65,7 @@ module.exports = {
         if(req.body.password){
             User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, user) {
                 if (err) return next(err);
+                user.password = req.body.password;
                 user.save(function(err, user){
                     if(err){
                         return next(err);

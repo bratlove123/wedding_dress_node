@@ -49,7 +49,7 @@ app.use(function(err, req, res, next){
     console.log(err);
     switch(err.status){
         case 401:
-            res.status(401).json({message: err.message || '', code: err.code || ''});
+            res.status(401).json({message: err.message || '', code: err.code || '', email: err.email || ''});
             break;
         case 404:
             res.status(404).json({message: 'Not Found'});
