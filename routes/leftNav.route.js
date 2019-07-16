@@ -8,4 +8,7 @@ router.get('/getall', leftNavController.getAll);
 router.get('/get/:id', leftNavController.getLeftNavById);
 router.put('/update/:id', leftNavController.edit);
 router.delete('/delete/:id', leftNavController.delete);
+router.get('/check', function(req, res,next){
+    res.json({status:'success',message:'Check login success!'});
+});
 module.exports=router;
