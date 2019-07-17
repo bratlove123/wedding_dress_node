@@ -1,5 +1,6 @@
 const Role = require('../models/role.model');
 const RoleGroup = require('../models/roleGroup.model');
+const logger = require('../logger');
 
 module.exports = {
     create: function (req, res, next) {
@@ -25,6 +26,7 @@ module.exports = {
                             ln.childs.push(e._id);
                         });
                         ln.save().then(()=>{
+                            logger.info("Create role success - id:" + ln._id);
                             res.json({status:'success',message:'Create role success!', data: null});
                         });
                     }
@@ -112,6 +114,7 @@ module.exports = {
                             });
                             ln.childs = childsToAdd;
                             ln.save().then((ln)=>{
+                                logger.info("Updated role success - id:" + ln._id);
                                 res.json({status:'success',message:'Updated role success!', data: ln});
                             });
                         }
@@ -128,6 +131,7 @@ module.exports = {
 
                             if(i===childsUpdate.length-1){
                                 if(!isRequestAdd){
+                                    logger.info("Updated role success - id:" + ln._id);
                                     res.json({status:'success',message:'Updated role success!', data: lni});
                                 }
                             }
@@ -142,6 +146,7 @@ module.exports = {
                             return next(err);
                         }
                         if(!isRequestUpdate){
+                            logger.info("Updated role success - id:" + ln._id);
                             res.json({status:'success',message:'Updated role success!', data: lni});
                         }
                     });
@@ -157,6 +162,7 @@ module.exports = {
                         if(err){
                             return next(err);
                         }
+                        logger.info("Deleted role success - id:" + ln._id);
                         res.json({status:'success',message:'Delete role success!', data: roleGroup._id});
                     });
                 }

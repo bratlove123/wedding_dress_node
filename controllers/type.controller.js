@@ -25,6 +25,7 @@ module.exports = {
                             ln.childs.push(e._id);
                         });
                         ln.save().then(()=>{
+                            logger.info("Create type success - id:" + ln._id);
                             res.json({status:'success',message:'Create type success!', data: null});
                         });
                     }
@@ -112,6 +113,7 @@ module.exports = {
                             });
                             ln.childs = childsToAdd;
                             ln.save().then((ln)=>{
+                                logger.info("Updated type success - id:" + ln._id);
                                 res.json({status:'success',message:'Updated type success!', data: ln});
                             });
                         }
@@ -128,6 +130,7 @@ module.exports = {
 
                             if(i===childsUpdate.length-1){
                                 if(!isRequestAdd){
+                                    logger.info("Updated type success - id:" + ln._id);
                                     res.json({status:'success',message:'Updated type success!', data: lni});
                                 }
                             }
@@ -142,6 +145,7 @@ module.exports = {
                             return next(err);
                         }
                         if(!isRequestUpdate){
+                            logger.info("Updated type success - id:" + ln._id);
                             res.json({status:'success',message:'Updated type success!', data: lni});
                         }
                     });
@@ -157,6 +161,7 @@ module.exports = {
                         if(err){
                             return next(err);
                         }
+                        logger.info("Delete type success - id:" + ln._id);
                         res.json({status:'success',message:'Delete type success!', data: type._id});
                     });
                 }

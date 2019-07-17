@@ -1,5 +1,6 @@
 const LeftNav = require('../models/leftNav.model');
 const LeftNavItem = require('../models/leftNavItem.model');
+const logger = require('../logger');
 
 module.exports = {
     create: function (req, res, next) {
@@ -25,6 +26,7 @@ module.exports = {
                             ln.childs.push(e._id);
                         });
                         ln.save().then(()=>{
+                            logger.info("Create left nav success - id:" + ln._id);
                             res.json({status:'success',message:'Create left nav success!', data: null});
                         });
                     }
@@ -114,6 +116,7 @@ module.exports = {
                             });
                             ln.childs = childsToAdd;
                             ln.save().then((ln)=>{
+                                logger.info("Update left nav success - id:" + ln._id);
                                 res.json({status:'success',message:'Updated left nav success!', data: ln});
                             });
                         }
@@ -131,6 +134,7 @@ module.exports = {
 
                             if(i===childsUpdate.length-1){
                                 if(!isRequestAdd){
+                                    logger.info("Update left nav success - id:" + ln._id);
                                     res.json({status:'success',message:'Updated left nav success!', data: lni});
                                 }
                             }
@@ -145,6 +149,7 @@ module.exports = {
                             return next(err);
                         }
                         if(!isRequestUpdate){
+                            logger.info("Update left nav success - id:" + ln._id);
                             res.json({status:'success',message:'Updated left nav success!', data: lni});
                         }
                     });
@@ -160,6 +165,7 @@ module.exports = {
                         if(err){
                             return next(err);
                         }
+                        logger.info("Delete left nav success - id:" + leftNav._id);
                         res.json({status:'success',message:'Delete left nav success!', data: leftNav._id});
                     });
                 }

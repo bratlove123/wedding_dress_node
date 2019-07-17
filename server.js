@@ -10,6 +10,7 @@ const public = require('./routes/public.route');
 const passport = require('passport');
 const cors = require('cors')
 const app = express();
+const logger = require('./logger');
 app.use(passport.initialize());
 app.use(cors());
 
@@ -37,16 +38,9 @@ app.use('/role', passport.authenticate('jwt', { session : false }), role);
 app.use('/upload', passport.authenticate('jwt', { session : false }), file);
 app.use('/public', public);
 
-//Handle 404
-app.use(function(req, res, next){
-    let err = new Error('Not Found');
-    err.status=404;
-    next();
-});
-
 //Handle error
 app.use(function(err, req, res, next){
-    console.log(err);
+    logger.error("Master Error - " + err);
     switch(err.status){
         case 401:
             res.status(401).json({message: err.message || '', code: err.code || '', email: err.email || ''});

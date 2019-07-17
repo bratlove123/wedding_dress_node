@@ -4,6 +4,7 @@ const UserModel = require('../models/user.model');
 const JWTstrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
 const authService = require('../services/auth.service');
+const logger = require('../logger');
 
 //Create a passport middleware to handle user registration
 passport.use('signup', new localStrategy({
@@ -14,9 +15,11 @@ passport.use('signup', new localStrategy({
     try {
       UserModel.findOne({$or: [{'userName': userName}, {'email': req.body.email}]}, function(err, user){
         if(err){
+          logger.error("Got error when check user - " + err);
           return done(err, false, { message : 'Got error when check user!'});
         }
         if(user){
+          logger.error("User already exists - " + userName);
           return done(null, false, { message : 'User already exists!'});
         }
         else{
@@ -39,9 +42,11 @@ passport.use('signup', new localStrategy({
 
           user.save(function(err){
             if(err){
+              logger.error("Got error when check user - " + err);
               return done(err, false, { message : 'Got error when save user!'});
             }
             else{
+              logger.info("Save user success - " + user.userName);
               authService.sendEmailForActivate(user.email, user.emailConfirmToken);
               //Send the user information to the next middleware
               return done(null, user);
@@ -63,21 +68,23 @@ passport.use('login', new localStrategy({
     //Find the user associated with the email provided by the user
     const user = await UserModel.findOne({ userName });
     if( !user ){
-      //If the user isn't found in the database, return a message
+      logger.error("Login fail user not found - " + userName);
       return done(null, false, { message : 'User not found', code: 'USER_NOT_FOUND'});
     }
     //Validate password and make sure it matches with the corresponding hash stored in the database
     //If the passwords match, it returns a value of true.
     const validate = await user.isValidPassword(password);
     if( !validate ){
+      logger.error("Wrong Password - " + userName);
       return done(null, false, { message : 'Wrong Password', code: 'WRONG_PASSWORD'});
     }
     const checkConfirmedEmail = await user.isConfirmedEmail();
     if(!checkConfirmedEmail){
+      logger.error("Haven't confirm email - " + userName);
       return done(null, false, { message : "Haven't confirm email", code: 'NOT_CONFIRM_EMAIL', email: user.email});
     }
 
-    //Send the user information to the next middleware
+    logger.info("Logged in Successfully - " + userName);
     return done(null, user, { message : 'Logged in Successfully'});
   } catch (error) {
     return done(error);
@@ -106,6 +113,7 @@ module.exports = {
           return next(err);
         }
         if(!user){
+          logger.error("Active Account - Cannot find user with this email! - " + user.userName);
           return next({status:401,message:'Cannot find user with this email!', data: null});
         }
         else{
@@ -115,15 +123,17 @@ module.exports = {
                 if(err){
                   return next(err);
                 }
-
+                logger.info("Active user successfully - " + user.userName);
                 res.json({status:200,message:'Active user successfully!', data: null});
               })
             }
             else{
+              logger.error("Active Account - Token expired! - " + user.userName);
               return next({status:401,message:'Token expired!', data: null});
             }
           }
           else{
+            logger.error("Active Account - Invalid Token! - " + user.userName);
             return next({status:401,message:'Invalid Token!', data: null});
           }
         }
@@ -136,6 +146,7 @@ module.exports = {
         return next(err);
       }
       if(!user){
+        logger.error("Send email forgot - Cannot find user with this email! - " + user.userName);
         return next({status:401,message:'Cannot find user with this email!', data: null});
       }
       else{
@@ -146,6 +157,7 @@ module.exports = {
           }
 
           authService.sendEmailForgotPass(req.body.email, user.emailConfirmToken);
+          logger.info("Send email reset password successfully - " + user.userName);
           res.json({status:'success',message:'Send email reset password success!', data: null});
         });
       }
@@ -158,6 +170,7 @@ module.exports = {
         return next(err);
       }
       if(!user){
+        logger.error("Send email active - Cannot find user with this email! - " + user.userName);
         return next({status:401,message:'Cannot find user with this email!', data: null});
       }
       else{
@@ -168,6 +181,7 @@ module.exports = {
           }
 
           authService.sendEmailForActivate(req.body.email, user.emailConfirmToken);
+          logger.info("Send email active successfully - " + user.userName);
           res.json({status:'success',message:'Send email active success!', data: null});
         });
       }
@@ -180,6 +194,7 @@ module.exports = {
         return next(err);
       }
       if(!user){
+        logger.error("Reset password - Cannot find user with this email - " + user.userName);
         return next({status:401, message:'Cannot find user with this email!', data: null});
       }
       else{
@@ -187,13 +202,16 @@ module.exports = {
           if(user.expiryTokenTime >= new Date()){
             user.password = req.body.password;
             user.save();
+            logger.info("Reset password - Reset password successfully - " + user.userName);
             res.json({status:'success',message:'Reset password successfully!', data: null});
           }
           else{
+            logger.error("Reset password - Token expired - " + user.userName);
             return next({status:401, message:'Token expired!', data: null});
           }
         }
         else{
+          logger.error("Reset password - Invalid Token - " + user.userName);
           return next({status:401,message:'Invalid Token!', data: null});
         }
       }

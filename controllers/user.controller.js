@@ -7,6 +7,7 @@ module.exports = {
               return next(err);
             }
             if(user){
+              logger.error("User already exists - " + userName);
               return next({status:403,message:'User already exists!', data: null});
             }
 
@@ -15,7 +16,7 @@ module.exports = {
                 if(err){
                     return next(err);
                 }
-
+                logger.info("Save user success - " + user.userName);
                 res.json({status:'success',message:'Create user success!', data: user});
             });
         }); 
@@ -70,6 +71,7 @@ module.exports = {
                     if(err){
                         return next(err);
                     }
+                    logger.info("Update user success - " + user.userName);
                     res.json({status:'success',message:'Update user success!', data: user});
                 });
             });
@@ -78,7 +80,7 @@ module.exports = {
             delete req.body.password;
             User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, ln) {
                 if (err) return next(err);
-    
+                logger.info("Update user success - " + user.userName);
                 res.json({status:'success',message:'Update user success!', data: ln});
             });
         }
@@ -90,6 +92,7 @@ module.exports = {
             }
             user.remove(function(err){
                 if(!err){
+                    logger.info("Delete user success - " + user.userName);
                     res.json({status:'success',message:'Delete user success!', data: user});
                 }
                 else{
@@ -101,7 +104,7 @@ module.exports = {
     toggleActive:  function(req, res, next){
         User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, ln) {
             if (err) return next(err);
-
+            logger.info("Active user success - " + user.userName);
             res.json({status:'success',message:'Update user success!', data: ln});
         });
     },
