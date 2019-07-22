@@ -1,4 +1,5 @@
 const User = require('../models/user.model');
+const logger = require('../logger');
 
 module.exports = {
     create: function(req, res, next){

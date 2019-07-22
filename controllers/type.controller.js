@@ -1,28 +1,29 @@
 const Type = require('../models/type.model');
 const Size = require('../models/size.model');
+const logger = require('../logger');
 
 module.exports = {
     create: function (req, res, next) {
-        var typeWithoutChilds = Object.assign({}, req.body);
-        delete typeWithoutChilds.childs;
-        var childs = req.body.childs;
-        var type = new Type(typeWithoutChilds);
+        var typeWithoutSizes = Object.assign({}, req.body);
+        delete typeWithoutSizes.sizes;
+        var sizes = req.body.sizes;
+        var type = new Type(typeWithoutSizes);
 
         type.save(function(err, ln){
             if(err){
                 return next(err);
             }
-            if(childs && childs.length >0 ){
-                childs.forEach(element => {
+            if(sizes && sizes.length >0 ){
+                sizes.forEach(element => {
                     element.typeId = ln._id;
                 });
-                Size.insertMany(childs, function(err, lni){
+                Size.insertMany(sizes, function(err, lni){
                     if(err){
                         return next(err);
                     }
                     if(lni && lni.length>0){
                         lni.forEach(e=>{
-                            ln.childs.push(e._id);
+                            ln.sizes.push(e._id);
                         });
                         ln.save().then(()=>{
                             logger.info("Create type success - id:" + ln._id);
@@ -35,7 +36,7 @@ module.exports = {
         });
     },
     getAll:function(req, res,next){
-        Type.find({}).populate('childs').exec(function(err, roleGroup){
+        Type.find({}).populate('sizes').exec(function(err, roleGroup){
             if(err){
                 return next(err);
             }
@@ -53,7 +54,7 @@ module.exports = {
             skip:skip,
             limit:pageSize,
             sort: sortBy
-        }).populate('childs').populate('modifiedBy').exec(
+        }).populate('sizes').populate('modifiedBy').exec(
         function(err, type){
             if(err){
                 return next(err);
@@ -70,7 +71,7 @@ module.exports = {
         });
     },
     getTypeById:function(req, res,next){
-        Type.findById(req.params.id).populate('childs').exec(function(err, ln){
+        Type.findById(req.params.id).populate('sizes').exec(function(err, ln){
             if(err){
                 return next(err);
             }
@@ -78,40 +79,40 @@ module.exports = {
         });
     },
     edit: function (req, res, next) {
-        var typeWithoutChilds = Object.assign({}, req.body);
-        delete typeWithoutChilds.childs;
-        delete typeWithoutChilds.del_arr;
-        var childs = req.body.childs;
+        var typeWithoutSizes = Object.assign({}, req.body);
+        delete typeWithoutSizes.sizes;
+        delete typeWithoutSizes.del_arr;
+        var sizes = req.body.sizes;
         var del_arr =  req.body.del_arr;
 
-        Type.findByIdAndUpdate(req.params.id, {$set: typeWithoutChilds}, function (err, ln) {
+        Type.findByIdAndUpdate(req.params.id, {$set: typeWithoutSizes}, function (err, ln) {
             if (err) return next(err);
-            if(childs && childs.length>0){
-                let childsAdd = childs.filter((c)=>{
+            if(sizes && sizes.length>0){
+                let sizesAdd = sizes.filter((c)=>{
                     return !c._id;
                 });
-                let childsUpdate = childs.filter((c)=>{
+                let sizesUpdate = sizes.filter((c)=>{
                     return c._id;
                 });
                 var isRequestAdd = false;
-                if(childsAdd.length > 0){
+                if(sizesAdd.length > 0){
                     isRequestAdd = true;
-                    childsAdd.forEach(element => {
+                    sizesAdd.forEach(element => {
                         element.typeId = ln._id;
                     });
-                    Size.insertMany(childsAdd, function(err, lni){
+                    Size.insertMany(sizesAdd, function(err, lni){
                         if(err){
                             return next(err);
                         }
                         if(lni && lni.length>0){
-                            let childsToAdd = [];
+                            let sizesToAdd = [];
                             lni.forEach(e=>{
-                                childsToAdd.push(e._id);
+                                sizesToAdd.push(e._id);
                             });
-                            childsUpdate.forEach(e=>{
-                                childsToAdd.push(e._id);
+                            sizesUpdate.forEach(e=>{
+                                sizesToAdd.push(e._id);
                             });
-                            ln.childs = childsToAdd;
+                            ln.sizes = sizesToAdd;
                             ln.save().then((ln)=>{
                                 logger.info("Updated type success - id:" + ln._id);
                                 res.json({status:'success',message:'Updated type success!', data: ln});
@@ -120,15 +121,15 @@ module.exports = {
                     });
                 }
                 var isRequestUpdate = false;
-                if(childsUpdate.length > 0){
+                if(sizesUpdate.length > 0){
                     isRequestUpdate=true;
-                    childsUpdate.forEach((e, i)=>{
+                    sizesUpdate.forEach((e, i)=>{
                         Size.findByIdAndUpdate(e._id, {$set: e}, function(err, lni){
                             if(err){
                                 return next(err);
                             }
 
-                            if(i===childsUpdate.length-1){
+                            if(i===sizesUpdate.length-1){
                                 if(!isRequestAdd){
                                     logger.info("Updated type success - id:" + ln._id);
                                     res.json({status:'success',message:'Updated type success!', data: lni});
@@ -161,7 +162,7 @@ module.exports = {
                         if(err){
                             return next(err);
                         }
-                        logger.info("Delete type success - id:" + ln._id);
+                        logger.info("Delete type success - id:" + type._id);
                         res.json({status:'success',message:'Delete type success!', data: type._id});
                     });
                 }

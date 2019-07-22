@@ -7,6 +7,8 @@ const leftNav = require('./routes/leftNav.route');
 const role = require('./routes/role.route');
 const file = require('./routes/file.route');
 const public = require('./routes/public.route');
+const type = require('./routes/type.route');
+const color = require('./routes/color.route');
 const passport = require('passport');
 const cors = require('cors')
 const app = express();
@@ -36,6 +38,8 @@ app.use('/leftnav', passport.authenticate('jwt', { session : false }), leftNav);
 app.use('/auth', auth);
 app.use('/role', passport.authenticate('jwt', { session : false }), role);
 app.use('/upload', passport.authenticate('jwt', { session : false }), file);
+app.use('/type', passport.authenticate('jwt', { session : false }), type);
+app.use('/color', passport.authenticate('jwt', { session : false }), color);
 app.use('/public', public);
 
 //Handle error

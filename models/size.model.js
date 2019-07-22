@@ -1,18 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TypeSchema = new Schema({
+const SizeSchema = new Schema({
     name: {
         type: String,
         trim: true,
         required: true
     },
-    sizes: [
-        { 
-            type: Schema.Types.ObjectId, 
-            ref: 'Size' 
-        }
-    ],
+    typeId: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Type'
+    },
     modifiedOn: {
         type: Date,
         default: Date.now
@@ -23,4 +21,4 @@ const TypeSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('Type', TypeSchema);
+module.exports = mongoose.model('Size', SizeSchema);
