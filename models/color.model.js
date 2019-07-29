@@ -12,6 +12,14 @@ const ColorSchema = new Schema({
         trim: true,
         required: true
     },
+    createdOn: {
+      type: Date,
+      default: Date.now
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     modifiedOn: {
         type: Date,
         default: Date.now

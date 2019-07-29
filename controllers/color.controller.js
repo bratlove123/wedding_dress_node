@@ -65,8 +65,8 @@ module.exports = {
     delete: function(req, res, next){
         Color.findByIdAndRemove(req.params.id, function(err, color){
             if(!err){
-                logger.info("Delete type success - id:" + color._id);
-                res.json({status:'success',message:'Delete type success!', data: color._id});
+                logger.info("Delete color success - id:" + color._id);
+                res.json({status:'success',message:'Delete color success!', data: color._id});
             }
             else{
                 return next(err);

@@ -1,25 +1,27 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const RoleGroupSchema = new Schema({
+const SupplierSchema = new Schema({
     name: {
         type: String,
         trim: true,
-        required: true,
-        unique: true
+        required: true
     },
-    code: {
-        type: String,
-        trim: true,
-        required: true,
-        unique: true
+    email: {
+        type: String
     },
-    childs: [
-        { 
-            type: Schema.Types.ObjectId, 
-            ref: 'Role' 
-        }
-    ],
+    image: {
+        type: String
+    },
+    phone: {
+        type: String
+    },
+    address: {
+        type: String
+    },
+    facebook: {
+        type: String
+    },
     createdOn: {
       type: Date,
       default: Date.now
@@ -38,4 +40,4 @@ const RoleGroupSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('RoleGroup', RoleGroupSchema);
+module.exports = mongoose.model('Supplier', SupplierSchema);

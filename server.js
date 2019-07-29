@@ -9,6 +9,7 @@ const file = require('./routes/file.route');
 const public = require('./routes/public.route');
 const type = require('./routes/type.route');
 const color = require('./routes/color.route');
+const supplier = require('./routes/supplier.route');
 const passport = require('passport');
 const cors = require('cors')
 const app = express();
@@ -40,6 +41,7 @@ app.use('/role', passport.authenticate('jwt', { session : false }), role);
 app.use('/upload', passport.authenticate('jwt', { session : false }), file);
 app.use('/type', passport.authenticate('jwt', { session : false }), type);
 app.use('/color', passport.authenticate('jwt', { session : false }), color);
+app.use('/supplier', passport.authenticate('jwt', { session : false }), supplier);
 app.use('/public', public);
 
 //Handle error

@@ -18,6 +18,14 @@ const RoleSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'RoleGroup'
     },
+    createdOn: {
+      type: Date,
+      default: Date.now
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     modifiedOn: {
         type: Date,
         default: Date.now

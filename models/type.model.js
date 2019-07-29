@@ -13,6 +13,14 @@ const TypeSchema = new Schema({
             ref: 'Size' 
         }
     ],
+    createdOn: {
+      type: Date,
+      default: Date.now
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     modifiedOn: {
         type: Date,
         default: Date.now
