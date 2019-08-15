@@ -7,14 +7,18 @@ let ProductSchema = new Schema({
     des: {type: String},
     lookAfter: {type: String},
     brand: {type: String},
+    typeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Type"
+    },
     supplierId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "ProductDetail"
+        ref: "Supplier"
     },
     details: [
         { 
             type: Schema.Types.ObjectId, 
-            ref: 'Size' 
+            ref: 'ProductDetail' 
         }
     ],
     createdOn: {
@@ -34,7 +38,6 @@ let ProductSchema = new Schema({
         ref: 'User'
     }
 });
-
 
 // Export the model
 module.exports = mongoose.model('Product', ProductSchema);

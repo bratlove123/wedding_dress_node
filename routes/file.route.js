@@ -7,15 +7,22 @@ var storage = multer.diskStorage({
       cb(null, 'public/images/uploads')
     },
     filename: (req, file, cb) => {
-      let customFileName = new Date().getTime(),
-            fileExtension = file.originalname.split('.')[1];
-      cb(null, file.originalname.split('.')[0] + '-' +customFileName + '.' + fileExtension);
+      let customFileName = new Date().getTime();
+      let nameSplit = file.originalname.split('.');
+      let fileExtension = nameSplit[nameSplit.length-1];
+      delete nameSplit[nameSplit.length-1];
+      let fileName = nameSplit.join('.');
+      cb(null, fileName + '-' + customFileName + '.' + fileExtension);
     }
 });
 var upload = multer({storage: storage});
 
 router.post('/image', upload.single('image'), (req, res, next) => {
-    res.json({status:'success',message:'File uploaded successfully!', data: req.file.filename});
+    res.json({status:'success',message:'Image uploaded successfully!', data: req.file.filename});
+});
+
+router.post('/images', upload.array('image', 10), function(req, res) {
+  res.json({status:'success',message:'Images uploaded successfully!', data: req.files});
 });
 
 router.get('/image:name', (req, res, next) => {

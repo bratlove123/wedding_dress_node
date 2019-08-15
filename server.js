@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 //Config route
 app.use('/user', user);
-app.use('/products', passport.authenticate('jwt', { session : false }), product);
+app.use('/product', passport.authenticate('jwt', { session : false }), product);
 app.use('/leftnav', passport.authenticate('jwt', { session : false }), leftNav);
 app.use('/auth', auth);
 app.use('/role', passport.authenticate('jwt', { session : false }), role);
