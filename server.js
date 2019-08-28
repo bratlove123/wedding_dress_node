@@ -10,6 +10,8 @@ const public = require('./routes/public.route');
 const type = require('./routes/type.route');
 const color = require('./routes/color.route');
 const supplier = require('./routes/supplier.route');
+const customer = require('./routes/customer.route');
+const customerGroup = require('./routes/customerGroup.route');
 const passport = require('passport');
 const cors = require('cors')
 const app = express();
@@ -42,6 +44,8 @@ app.use('/upload', passport.authenticate('jwt', { session : false }), file);
 app.use('/type', passport.authenticate('jwt', { session : false }), type);
 app.use('/color', passport.authenticate('jwt', { session : false }), color);
 app.use('/supplier', passport.authenticate('jwt', { session : false }), supplier);
+app.use('/customer', passport.authenticate('jwt', { session : false }), customer);
+app.use('/customerGroup', passport.authenticate('jwt', { session : false }), customerGroup);
 app.use('/public', public);
 
 //Handle error

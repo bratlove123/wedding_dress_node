@@ -56,11 +56,11 @@ module.exports = {
         });
     },
     getUserById:function(req, res,next){
-        User.findById(req.params.id).populate('modifiedBy').exec(function(err, ln){
+        User.findById(req.params.id).populate('modifiedBy').exec(function(err, user){
             if(err){
                 return next(err);
             }
-            res.json({status:'success',message:'Get user success!', data: ln});
+            res.json({status:'success',message:'Get user success!', data: user});
         });
     },
     updateUser:function(req, res, next){
@@ -79,10 +79,10 @@ module.exports = {
         }
         else{
             delete req.body.password;
-            User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, ln) {
+            User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, user) {
                 if (err) return next(err);
                 logger.info("Update user success - " + user.userName);
-                res.json({status:'success',message:'Update user success!', data: ln});
+                res.json({status:'success',message:'Update user success!', data: user});
             });
         }
     },
@@ -103,18 +103,18 @@ module.exports = {
         });
     },
     toggleActive:  function(req, res, next){
-        User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, ln) {
+        User.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, user) {
             if (err) return next(err);
             logger.info("Active user success - " + user.userName);
-            res.json({status:'success',message:'Update user success!', data: ln});
+            res.json({status:'success',message:'Update user success!', data: user});
         });
     },
     getRoles: function(req, res, next){
-        User.findById(req.params.id).populate('roles').exec(function(err, ln){
+        User.findById(req.params.id).populate('roles').exec(function(err, user){
             if(err){
                 return next(err);
             }
-            res.json({status:'success',message:'Get roles of user success!', data: ln.roles});
+            res.json({status:'success',message:'Get roles of user success!', data: user.roles});
         });
     }
 }
