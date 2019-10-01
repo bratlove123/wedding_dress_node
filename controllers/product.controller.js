@@ -70,6 +70,31 @@ module.exports = {
             }
         });
     },
+    findProduct:function(req, res,next){
+        Product.find({$or:[ {'name':{ "$regex": req.query.search, "$options": "i" }}, 
+        {'code':{ "$regex": req.query.search, "$options": "i" }}]}).populate({ 
+            path: 'details',
+            populate: {
+              path: 'sizes',
+              model: 'ProductSize',
+              populate:{
+                path: 'sizeId',
+                model: 'Size',
+              }
+            } 
+         }).populate({ 
+            path: 'details',
+            populate: {
+              path: 'colorId',
+              model: 'Color'
+            } 
+         }).exec(function(err, product){
+            if(err){
+                return next(err);
+            }
+            res.json({status:'success',message:'Get product success!', data: product});
+        });
+    },
     getAll:function(req, res,next){
         Product.find({}).exec(function(err, product){
             if(err){

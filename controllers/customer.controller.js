@@ -20,6 +20,17 @@ module.exports = {
             res.json({status:'success',message:'Get customer success!', data: customer});
         });
     },
+    findCustomer:function(req, res,next){
+        Customer.find({$or:[ {'name':{ "$regex": req.query.search, "$options": "i" }}, 
+        {'phone':{ "$regex": req.query.search, "$options": "i" }},
+        {'email':{ "$regex": req.query.search, "$options": "i" }},
+        {'facebook':{ "$regex": req.query.search, "$options": "i" }} ]}).populate('customerGroupId').exec(function(err, customer){
+            if(err){
+                return next(err);
+            }
+            res.json({status:'success',message:'Get customer success!', data: customer});
+        });
+    },
     getSort: function(req, res,next){
         var sortBy = {};
         sortBy[req.query.orderBy?req.query.orderBy:"modifiedOn"] = req.query.sort==="true"?1:-1;
